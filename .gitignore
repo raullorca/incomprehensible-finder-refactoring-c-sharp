@@ -3,3 +3,6 @@
 ################################################################################
 
 /Algorithm.Tests/obj/Debug
+/Algorithm.Tests/bin/Debug
+/Algorithm/Algorithm/obj/Debug
+/Algorithm/Algorithm/bin/Debug
