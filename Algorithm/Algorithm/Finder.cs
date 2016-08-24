@@ -4,64 +4,84 @@ namespace Algorithm
 {
     public class Finder
     {
-        private readonly List<Thing> _p;
+        private readonly List<Person> _people;
 
-        public Finder(List<Thing> p)
+        public Finder(List<Person> people)
         {
-            _p = p;
+            _people = people;
         }
 
-        public F Find(FT ft)
+        public Pair Find(SearchType searchType)
         {
-            var tr = new List<F>();
+            List<Pair> pairs = GetAllPairs(_people);
 
-            for(var i = 0; i < _p.Count - 1; i++)
+            if (pairs.Count < 1)
             {
-                for(var j = i + 1; j < _p.Count; j++)
+                return new Pair();
+            }
+
+            return GetMatchingPair(searchType, pairs);
+        }
+
+        private Pair GetMatchingPair(SearchType searchType, List<Pair> pairs)
+        {
+            Pair matchingPair = pairs[0];
+            foreach (var pair in pairs)
+            {
+                if (IsBetterMatch(searchType, matchingPair, pair))
                 {
-                    var r = new F();
-                    if(_p[i].BirthDate < _p[j].BirthDate)
-                    {
-                        r.P1 = _p[i];
-                        r.P2 = _p[j];
-                    }
-                    else
-                    {
-                        r.P1 = _p[j];
-                        r.P2 = _p[i];
-                    }
-                    r.D = r.P2.BirthDate - r.P1.BirthDate;
-                    tr.Add(r);
+                    matchingPair = pair;
                 }
             }
 
-            if(tr.Count < 1)
+            return matchingPair;
+        }
+
+        private bool IsBetterMatch(SearchType searchType, Pair matchingPair, Pair pair)
+        {
+            if (searchType == SearchType.Closest &&
+                 pair.Difference < matchingPair.Difference)
             {
-                return new F();
+                return true;
+            }
+            if (searchType == SearchType.Furthest &&
+                pair.Difference > matchingPair.Difference)
+            {
+                return true;
             }
 
-            F answer = tr[0];
-            foreach(var result in tr)
-            {
-                switch(ft)
-                {
-                    case FT.One:
-                        if(result.D < answer.D)
-                        {
-                            answer = result;
-                        }
-                        break;
+            return false;
+        }
 
-                    case FT.Two:
-                        if(result.D > answer.D)
-                        {
-                            answer = result;
-                        }
-                        break;
+        private List<Pair> GetAllPairs(List<Person> people)
+        {
+            var pairs = new List<Pair>();
+
+            for (var current = 0; current < people.Count - 1; current++)
+            {
+                for (var next = current + 1; next < people.Count; next++)
+                {
+                    pairs.Add(ComputeBirthDateDifference(people[current], people[next]));
                 }
             }
 
-            return answer;
+            return pairs;
+        }
+
+        private Pair ComputeBirthDateDifference(Person person1, Person person2)
+        {
+            var result = new Pair();
+
+            result.Oldest = IsOlder(person1, person2) ? person1 : person2;
+            result.Younger = IsOlder(person1, person2) ? person2 : person1;
+            result.Difference = result.Younger.BirthDate - result.Oldest.BirthDate;
+
+            return result;
+        }
+
+        private bool IsOlder(Person person1, Person person2)
+        {
+            return person1.BirthDate < person2.BirthDate;
         }
     }
 }
